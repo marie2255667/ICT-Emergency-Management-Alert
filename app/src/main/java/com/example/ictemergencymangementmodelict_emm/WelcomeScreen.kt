@@ -1,6 +1,8 @@
 package com.example.ictemergencymangementmodelict_emm
 
-import android.annotation.SuppressLint
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,15 +18,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewState
+import androidx.compose.ui.viewinterop.AndroidView
 
-@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun WelcomeScreen(modifier: Modifier = Modifier, onNavigateToMessages: () -> Unit) {
+    var webView: WebView? by remember { mutableStateOf(null) }
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -32,22 +38,35 @@ fun WelcomeScreen(modifier: Modifier = Modifier, onNavigateToMessages: () -> Uni
         item {
             Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val state = rememberWebViewState(url = "https://zoom.earth/")
-                    WebView(
-                        state = state,
+                    // Using the native Android WebView for maximum reliability
+                    AndroidView(
+                        factory = { context ->
+                            WebView(context).apply {
+                                webViewClient = WebViewClient() // Keeps navigation inside the WebView
+                                webChromeClient = WebChromeClient() // Enables advanced features like video and animations
+                                settings.javaScriptEnabled = true
+                                settings.domStorageEnabled = true
+                                settings.mediaPlaybackRequiresUserGesture = false
+                            }.also {
+                                webView = it
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp),
-                        onCreated = { it.settings.javaScriptEnabled = true }
+                            .height(200.dp)
                     )
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { /*TODO*/ }) {
-                        Text("View")
+
+                    Button(onClick = { webView?.loadUrl("https://www.pagasa.dost.gov.ph/") }) {
+                        Text("Load PAGASA Site")
                     }
+
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
+
         item {
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -58,24 +77,33 @@ fun WelcomeScreen(modifier: Modifier = Modifier, onNavigateToMessages: () -> Uni
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-                        Button(onClick = { /*TODO*/ }) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(onClick = { /* TODO: Add alert action */ }) {
                             Text("Alert")
                         }
-                        Button(onClick = { /*TODO*/ }) {
+                        Button(onClick = { /* TODO: Add rescue action */ }) {
                             Text("Rescue")
                         }
                     }
                 }
             }
         }
+
         item {
             Spacer(modifier = Modifier.height(16.dp))
         }
-        item { NewsSection() }
+
+        item {
+            NewsSection()
+        }
+
         item {
             Spacer(modifier = Modifier.height(16.dp))
         }
+
         item {
             Button(onClick = onNavigateToMessages) {
                 Text("Create Message")
@@ -101,11 +129,12 @@ fun NewsSection() {
     }
 }
 
+// Assuming NewsCard is defined somewhere else in your project
 @Composable
 fun NewsCard(title: String, modifier: Modifier = Modifier) {
     Card(modifier = modifier) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = title)
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

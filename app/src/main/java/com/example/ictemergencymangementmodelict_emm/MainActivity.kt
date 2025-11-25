@@ -18,10 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.ictemergencymangementmodelict_emm.ui.theme.ICTEmergencyMangementModelICTEMMTheme
 
 class MainActivity : ComponentActivity() {
@@ -89,7 +91,22 @@ fun ICTEmergencyMangementModelICTEMMApp() {
                     UserPolicyScreen(onBack = { navController.popBackStack() })
                 }
                 composable("messages") {
-                    MessageScreen(onBack = { navController.popBackStack() })
+                    MessageScreen(
+                        onBack = { navController.popBackStack() },
+                        onNavigateToCompose = { recipient ->
+                            navController.navigate("composeMessage/$recipient")
+                        }
+                    )
+                }
+                composable(
+                    route = "composeMessage/{recipient}",
+                    arguments = listOf(navArgument("recipient") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val recipient = backStackEntry.arguments?.getString("recipient") ?: ""
+                    ComposeMessageScreen(
+                        recipient = recipient,
+                        onBack = { navController.popBackStack() }
+                    )
                 }
             }
         }
@@ -103,5 +120,5 @@ enum class AppDestinations(
 ) {
     HOME("home", "Home", Icons.Default.Home),
     FAVORITES("favorites", "Favorites", Icons.Default.Favorite),
-    PROFILE("profile", "Profile", Icons.Default.AccountBox),
+    PROFILE("profile", "Profile", Icons.Default.AccountBox)
 }

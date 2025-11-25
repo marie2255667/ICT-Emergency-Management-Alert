@@ -1,9 +1,6 @@
 package com.example.ictemergencymangementmodelict_emm
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,22 +12,28 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessageScreen(onBack: () -> Unit, onNavigateToCompose: (String) -> Unit) {
+fun ComposeMessageScreen(recipient: String, onBack: () -> Unit) {
+    var message by remember { mutableStateOf("") }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Message") },
+                title = { Text("To: $recipient") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
@@ -46,17 +49,15 @@ fun MessageScreen(onBack: () -> Unit, onNavigateToCompose: (String) -> Unit) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Create Message", style = MaterialTheme.typography.headlineSmall)
-            Spacer(modifier = Modifier.height(8.dp))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val recipients = listOf("Barangay Response Team", "MDRRMO", "DSWD", "MMO", "BFP", "MPS", "MHO")
-                recipients.forEach { recipient ->
-                    Button(onClick = { onNavigateToCompose(recipient) }) { Text(recipient) }
-                }
+            OutlinedTextField(
+                value = message,
+                onValueChange = { message = it },
+                label = { Text("Your Message") },
+                modifier = Modifier.fillMaxWidth().weight(1f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { /* TODO: Implement send action */ }) {
+                Text("Send")
             }
         }
     }
